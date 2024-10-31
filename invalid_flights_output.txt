@@ -1,0 +1,10 @@
+Error: Medium narrow body doesn't have the range to fly to JFK
+Error: Too many total seats booked on this flight
+Departure: MAN, Destination: MAD, Aircraft: Medium narrow body, Distance: 1435 km, Profit/Loss: £NaN
+Error: Too many total seats booked on this flight
+Departure: MAN, Destination: CAI, Aircraft: Large narrow body, Distance: 3740 km, Profit/Loss: £NaN
+Error: Invalid departure or destination airport code.
+Error: Too many total seats booked on this flight
+Error: Too many total seats booked on this flight
+Error: Invalid departure or destination airport code.
+Error: Too many total seats booked on this flight

@@ -1,0 +1,10 @@
+Departure: MAN, Destination: JFK, Aircraft: Large narrow body, Distance: 5376 km, Profit/Loss: £13919.52
+Departure: LGW, Destination: ORY, Aircraft: Medium narrow body, Distance: 325 km, Profit/Loss: £18272.00
+Departure: MAN, Destination: MAD, Aircraft: Medium wide body, Distance: 1435 km, Profit/Loss: £46633.00
+Departure: LGW, Destination: AMS, Aircraft: Medium narrow body, Distance: 363 km, Profit/Loss: £11321.76
+Departure: MAN, Destination: CAI, Aircraft: Large narrow body, Distance: 3740 km, Profit/Loss: £50414.20
+Error: Medium wide body doesn't have the range to fly to JFK
+Departure: MAN, Destination: ORY, Aircraft: Medium narrow body, Distance: 610 km, Profit/Loss: £11530.40
+Departure: LGW, Destination: MAD, Aircraft: Large narrow body, Distance: 1216 km, Profit/Loss: £50487.92
+Departure: MAN, Destination: AMS, Aircraft: Medium narrow body, Distance: 485 km, Profit/Loss: £7964.00
+Departure: LGW, Destination: CAI, Aircraft: Medium wide body, Distance: 3494 km, Profit/Loss: £80158.80
