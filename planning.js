@@ -22,7 +22,9 @@ function readCsv(filename, delimiter = ',') {
 }
 const airportsData = readCsv('airports.csv');
 const aeroplanesData = readCsv('aeroplanes.csv');
-const flightData = readCsv('valid_flight_data.csv')
+const flightData = readCsv('valid_flight_data.csv');
+const invalidFlightData = readCsv('invalid_flight_data.csv');
+
 
 function flightDistance(col, airportCode){
     const airports = airportsData.filter(row => row[col] === airportCode);
@@ -32,50 +34,145 @@ function flightDistance(col, airportCode){
             distanceFromMAN: parseFloat(airport[2]),
             distanceFromLGW: parseFloat(airport[3])
         };
-    }else{
+    }else {
         return null;
     } 
 }
-
 function flightDetails(airportsData, aeroplanesData, flightData) {
     const results = flightData.map(flight => {
-        const distanceData = flightDistance(0, flight[1], airportsData);
-        const aeroplane = aeroplanesData.map(a => a[0] === flight[2]);
-
-        if (!distanceData || !aeroplane) {
-            return {
-                error: `Invalid data for flight ${flight[0]}`, flightID: flight[0]
-            };
-        }
-
-        // Check flight[1] for the destination airport code
-        const distance = flight[0] === 'MAN' ? distanceData.distanceFromMAN : distanceData.distanceFromLGW;
-
-        // Calculate revenues
-        const economyRevenue = flight[3] * flight[6];
-        const businessClassRevenue = flight[4] * flight[7];
-        const firstClassRevenue = flight[5] * flight[8];
-        const totalRevenue = economyRevenue + businessClassRevenue + firstClassRevenue;
-
-        // Calculate total cost
-        const totalCost = distance * aeroplane[1] * 2; // Assuming aeroplane[1] is cost per mile
-
-        // Calculate profit or loss
-        const profitLoss = totalRevenue - totalCost;
-
-        // Return the computed details
+    const distanceData = flightDistance(0, flight[1]);
+    const aeroplane = aeroplanesData.find(a => a[0] === flight[2]);
+    if (!distanceData || !aeroplane) {
         return {
-            flightId: flight[0],
-            destination: flight[1],
-            distance,
-            totalRevenue,
-            totalCost,
-            profitLoss,
+            error: `Invalid data for flight ${flight[0]}`,
+            flightId: flight[0]
         };
+    }
+    const distance = flight[0] === 'MAN' ? distanceData.distanceFromMAN : distanceData.distanceFromLGW;
+    const economyIncome = flight[3] * flight[6];
+    const businessClassIncome = flight[4] * flight[7];
+    const firstClassIncome = flight[5] * flight[8];
+    const totalIncome = economyIncome + businessClassIncome + firstClassIncome;
+   
+    // Calculate total cost using the correct cost per seat per mile from 'aeroplane'
+    const totalSeatsTaken = parseInt(flight[3]) + parseInt(flight[4]) + parseInt(flight[5]);
+    const totalCostPerSeat = parseFloat((aeroplane[1].replace('£', '')) * (distance / 100));
+    const totalCost = (totalCostPerSeat* totalSeatsTaken).toFixed(2);
+    const profitLoss = (totalIncome - parseFloat(totalCost)).toFixed(2);
+    return {
+        departure: flight[0],
+        destination: flight[1],
+        aircraftType: aeroplane[0],
+        distance: `${distance} km`,
+        profitLoss: `£${profitLoss}`
+    };
     });
-
     return results;
 }
+
+function validateAirportCodes(invalidFlightData) {
+    const destinationAirport = airportsData.find(airport => airport[0] === invalidFlightData[1]);
+    if (!destinationAirport) {
+        return {
+            departure: invalidFlightData[0],
+            destination: invalidFlightData[1],
+            error: "Invalid destination airport code."
+        };
+    }
+    return null; // No airport code errors
+}
+
+
+function validateAeroplaneType(flight, aeroplanesData) {
+    const aeroplane = aeroplanesData.find(a => a[0] === flight[2]);
+    if (!aeroplane) {
+        return {
+        departure: flight[0],
+        destination: flight[1],
+        error: "Invalid aeroplane type."
+        };
+    }
+    return aeroplane; // Return the aeroplane data if valid
+}
+function validateSeatCapacity(flight, aeroplane) {
+    const categories = ['economy', 'business', 'first class'];
+    const seatIndices = [3, 4, 5];
+  
+    for (let i = 0; i < categories.length; i++) {
+        const seatsTaken = parseInt(flight[seatIndices[i]]);
+        const seatCapacity = parseInt(aeroplane[seatIndices[i] + 3]);
+        if (seatsTaken > seatCapacity) {
+            return {
+                departure: flight[0],
+                destination: flight[1],
+                error: `Too many ${categories[i]} seats have been booked on this flight`
+            };
+        }
+    }
+    const totalSeatsTaken = seatIndices.reduce((total, index) => total + parseInt(flight[index]), 0);
+    const totalSeatCapacity = parseInt(aeroplane[3]) + parseInt(aeroplane[4]) + parseInt(aeroplane[5]);
+    if (totalSeatsTaken > totalSeatCapacity) {
+        return {
+        departure: flight[0],
+        destination: flight[1],
+        error: "Too many total seats booked on this flight"
+    };
+    }
+    return null; // No seat capacity errors
+}
+function validateFlightRange(flight, aeroplane) {
+    // Find the destination airport data
+    const destinationAirport = airportsData.find(airport => airport[0] === flight[1]);
+    if (!destinationAirport) {
+        return {
+            departure: flight[0],
+            destination: flight[1],
+            error: "Invalid destination airport code."
+        };
+    }
+    // Calculate distance based on departure airport
+    const distance = flight[0] === 'MAN'
+    ? parseFloat(destinationAirport[2])  // Distance from MAN
+    : parseFloat(destinationAirport[3]); // Distance from LGW
+    const maxFlightRange = parseFloat(aeroplane[2]);
+    if (distance > maxFlightRange) {
+        return {
+            departure: flight[0],
+            destination: flight[1],
+            error: `${aeroplane[0]} doesn't have the range to fly to ${flight[1]}`
+        };
+    }
+    return null; // No range errors
+}
+
+function validateFlight(flight, airportsData, aeroplanesData) {
+    const airportCodeError = validateAirportCodes(flight, airportsData);
+    if (airportCodeError) {
+        console.log(airportCodeError);
+        return;
+    }
+
+    const aeroplane = validateAeroplaneType(flight, aeroplanesData);
+    if (aeroplane.error) {
+        console.log(aeroplane);
+        return;
+    }
+
+    const seatCapacityError = validateSeatCapacity(flight, aeroplane);
+    if (seatCapacityError) {
+        console.log(seatCapacityError);
+        return;
+    }
+
+    const rangeError = validateFlightRange(flight, aeroplane, airportsData);
+    if (rangeError) {
+        console.log(rangeError);
+        return;
+    }
+
+    console.log('Flight is valid:', flight);
+}
+
 
 
 
@@ -89,11 +186,18 @@ if (airportsData && aeroplanesData && flightData) {
   } else {
     console.error("Error: Unable to read one or more CSV files.");
   }
-/*if (airportsData) {
-    airportsData.forEach(row => {
-        console.log(row);
-    });
-}*/
+
+if (airportsData && aeroplanesData && invalidFlightData) {
+    const invalidFlightResults = validateFlight(airportsData && aeroplanesData && invalidFlightData);
+    console.log(invalidFlightResults);
+} else {
+    console.error("Error: Unable to read one or more CSV files.");
+}
+
 
 flightDistance()
 flightDetails()
+validateAeroplaneType()
+validateSeatCapacity()
+validateFlightRange()
+validateAirportCodes()
