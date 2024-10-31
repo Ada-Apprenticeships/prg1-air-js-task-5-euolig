@@ -97,29 +97,32 @@ function validateAeroplaneType(flight, aeroplanesData) {
 function validateSeatCapacity(flight, aeroplane) {
     const categories = ['economy', 'business', 'first class'];
     const seatIndices = [3, 4, 5];
+    const errors = [];
   
     for (let i = 0; i < categories.length; i++) {
         const seatsTaken = parseInt(flight[seatIndices[i]]);
-        const seatCapacity = parseInt(aeroplane[seatIndices[i] + 3]);
+        const seatCapacity = parseInt(aeroplane[seatIndices[i]]);
+    
         if (seatsTaken > seatCapacity) {
-            return {
-                departure: flight[0],
-                destination: flight[1],
-                error: `Too many ${categories[i]} seats have been booked on this flight`
-            };
+          errors.push(`Too many ${categories[i]} seats have been booked on this flight`);
         }
-    }
-    const totalSeatsTaken = seatIndices.reduce((total, index) => total + parseInt(flight[index]), 0);
-    const totalSeatCapacity = parseInt(aeroplane[3]) + parseInt(aeroplane[4]) + parseInt(aeroplane[5]);
-    if (totalSeatsTaken > totalSeatCapacity) {
-        return {
+      }
+    
+      const totalSeatsTaken = seatIndices.reduce((total, index) => total + parseInt(flight[index]), 0);
+      const totalSeatCapacity = parseInt(aeroplane[3]) + parseInt(aeroplane[4]) + parseInt(aeroplane[5]);
+    
+      if (totalSeatsTaken > totalSeatCapacity) {
+        errors.push("Too many total seats booked on this flight");
+      }
+    
+      // Return an error object if there are any errors, otherwise return null
+      return errors.length > 0 ? {
         departure: flight[0],
         destination: flight[1],
-        error: "Too many total seats booked on this flight"
-    };
-    }
-    return null; // No seat capacity errors
+        error: errors.join(' and ') // Combine errors with "and"
+      } : null; 
 }
+
 function validateFlightRange(flight, aeroplane) {
     // Find the destination airport data
     const destinationAirport = airportsData.find(airport => airport[0] === flight[1]);
@@ -160,9 +163,10 @@ function validateFlight(flight, airportsData, aeroplanesData) {
 
     const seatCapacityError = validateSeatCapacity(flight, aeroplane);
     if (seatCapacityError) {
-        console.log(seatCapacityError);
-        return;
+      console.log(seatCapacityError); // Log the entire error object
+      return seatCapacityError; // Return the error object to stop further processing
     }
+
 
     const rangeError = validateFlightRange(flight, aeroplane, airportsData);
     if (rangeError) {
@@ -187,13 +191,14 @@ if (airportsData && aeroplanesData && flightData) {
     console.error("Error: Unable to read one or more CSV files.");
   }
 
-if (airportsData && aeroplanesData && invalidFlightData) {
-    const invalidFlightResults = validateFlight(airportsData && aeroplanesData && invalidFlightData);
-    console.log(invalidFlightResults);
-} else {
+  if (airportsData && aeroplanesData && invalidFlightData) {
+    // Iterate through each flight in invalidFlightData
+    invalidFlightData.forEach(flight => { 
+      validateFlight(flight, airportsData, aeroplanesData);
+    });
+  } else {
     console.error("Error: Unable to read one or more CSV files.");
-}
-
+  }
 
 flightDistance()
 flightDetails()
