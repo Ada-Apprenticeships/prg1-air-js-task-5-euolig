@@ -82,7 +82,7 @@ function flightDetails(airportsData, aeroplanesData, flightData) {
         errors.push(`${aeroplane[0]} doesn't have ${categories[i]} seats`);
       } else if (seatsTaken > seatCapacity) {
         errors.push(
-          `Too many ${categories[i]} seats have been booked on this flight`
+          `Too many ${categories[i]} seats have been booked on this flight (${seatsTaken} > ${seatCapacity })`
         );
       } else if (
         seatsTaken > seatCapacity &&
