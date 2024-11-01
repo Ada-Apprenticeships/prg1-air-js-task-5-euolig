@@ -3,8 +3,8 @@ Departure: LGW, Destination: ORY, Error: Too many economy seats have been booked
 Departure: MAN, Destination: MAD, Error: Medium narrow body doesn't have first-class seats
 Departure: LGW, Destination: AMS, Error: Too many economy seats have been booked on this flight (180 > 160)
 Departure: MAN, Destination: CAI, Error: Too many business seats have been booked on this flight (25 > 20)
-Departure: LGW, Destination: JFKKK, Error: Invalid departure or destination airport code
+Departure: LGW, Destination: JFKKK, Error: Invalid destination airport code
 Departure: MAN, Destination: ORY, Error: Too many economy seats have been booked on this flight (165 > 160)
 Departure: LGW, Destination: MAD, Error: Too many business seats have been booked on this flight (22 > 20)
-Departure: MAN, Destination: AMSSS, Error: Invalid departure or destination airport code
+Departure: MAN, Destination: AMSSS, Error: Invalid destination airport code
 Departure: LGW, Destination: CAI, Error: Too many economy seats have been booked on this flight (385 > 380)
